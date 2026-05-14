@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ToDoアプリ</title>
+    <meta name="description" content="やることを管理できるシンプルなToDoアプリです">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+
+<header class="header">
+    <h1 class="header-logo">
+        <a href="index.html" class="header-link">
+            <img src="img/logo.jpeg" alt="ロゴ">
+        </a>
+    </h1>
+
+    <div class="header-icons">
+        <i class="fa-solid fa-house"></i>
+        <i class="fa-solid fa-user"></i>
+        <i class="fa-solid fa-gear"></i>
+        <i class="fa-solid fa-moon" id="darkModeBtn"></i>
+    </div>
+</header>
+
+<main>
+
+    <h2 class="title">My ToDo</h2>
+  
+    <div class="input-area">
+      <input type="text" id="taskInput" placeholder="例：JavaScriptを勉強">
+      <button id="addBtn">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+  
+    <div class="task-container">
+
+        <div class="task-box">
+          <h3>未完了タスク</h3>
+          <ul id="taskList"></ul>
+        </div>
+      
+        <div class="task-box">
+          <h3>完了したタスク</h3>
+          <ul id="completedList"></ul>
+        </div>
+      
+      </div>
+  
+  </main>
+
+<script src="js/script.js"></script>
+
+</body>
+</html>
