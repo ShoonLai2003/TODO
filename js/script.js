@@ -1,6 +1,7 @@
 const addBtn = document.getElementById("addBtn");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
+const taskDate = document.getElementById("taskDate");
 const completedList = document.getElementById("completedList");
 const darkModeBtn = document.getElementById("darkModeBtn");
 
@@ -14,6 +15,8 @@ function createTask(taskObj){
 
     const span = document.createElement("span");
     span.textContent = taskObj.text;
+    const taskDateText = document.createElement("small");
+    taskDateText.textContent = taskObj.date;
 
     const date = document.createElement("small");
 
@@ -89,6 +92,7 @@ function createTask(taskObj){
     li.appendChild(date);
     li.appendChild(editBtn);
     li.appendChild(deleteBtn);
+    li.appendChild(taskDateText);
     li.classList.add("task-item");
     
     if (taskObj.completed) {
@@ -109,6 +113,7 @@ addBtn.addEventListener("click", function () {
 
     const taskObj = {
         text: task,
+        date: taskDate.value,
         completed: false,
         completedDate: null
     };
