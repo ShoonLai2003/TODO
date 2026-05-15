@@ -126,17 +126,16 @@ body{
 
   @media (max-width: 768px) {
 
-    main {
-      width: 90%;
-    }
-  
-    .task-container {
-      flex-direction: column;
-    }
-  
     .header {
       flex-direction: column;
-      gap: 10px;
+      gap: 15px;
+      padding: 20px;
+    }
+  
+    .header-icons {
+      display: flex;
+      justify-content: center;
+      width: 100%;
     }
   
   }
