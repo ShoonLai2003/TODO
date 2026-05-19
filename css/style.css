@@ -6,21 +6,37 @@
   justify-content: space-between;
   align-items: center;
   padding: 15px 20px;
-  background-color: #4caf50;
+  background: linear-gradient(135deg, #7ed957, #4CAF50);
 }
 .header-logo img {
   width: 120px;   /* 好きなサイズに調整OK */
   height: auto;
 }
-.header-icons i {
+.header-icons {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  margin-top: 20px;
+}
+
+.header-icons i,
+.header-icons button {
+  font-size: 28px;
   color: white;
-  font-size: 20px;
-  margin-left: 15px;
+  background: transparent;
+  border: none;
   cursor: pointer;
 }
 
-.header-icons i:hover {
-  opacity: 0.7;
+.header-icons button {
+  padding: 0;
+}
+
+.header-icons i:hover,
+.header-icons button:hover {
+  transform: scale(1.15);
+  transition: 0.3s;
 }
 
 main {
@@ -161,3 +177,10 @@ body{
   .dark-mode .task-box h3 {
     color: #90caf9;
   }  
+
+  #loginBtn,#logoutBtn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
