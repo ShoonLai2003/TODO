@@ -14,6 +14,7 @@ import {
     query,
     where
 } from "./firebase.js";
+
 const addBtn = document.getElementById("addBtn");
 const taskInput = document.getElementById("taskInput");
 const taskList = document.getElementById("taskList");
@@ -26,7 +27,8 @@ const userName = document.getElementById("userName");
 
 let tasks = [];
 
-function createTask(taskObj){
+function createTask(taskObj) {
+
     const li = document.createElement("li");
 
     const checkbox = document.createElement("input");
@@ -34,6 +36,7 @@ function createTask(taskObj){
 
     const span = document.createElement("span");
     span.textContent = taskObj.text;
+
     const taskDateText = document.createElement("small");
     taskDateText.textContent = taskObj.date;
 
@@ -41,75 +44,85 @@ function createTask(taskObj){
 
     if (taskObj.completedDate) {
         date.textContent =
-        new Date(taskObj.completedDate).toLocaleString("ja-JP");
+            new Date(taskObj.completedDate).toLocaleString("ja-JP");
     }
 
-    // 初期状態
     checkbox.checked = taskObj.completed;
+
     span.classList.toggle("completed", taskObj.completed);
 
+    // 完了チェック
     checkbox.addEventListener("change", function () {
 
         taskObj.completed = checkbox.checked;
-    
-        // 完了日時
+
         if (checkbox.checked) {
+
             taskObj.completedDate = new Date();
-    
+
             date.textContent =
-              new Date(taskObj.completedDate).toLocaleString("ja-JP");
-    
-        } else {
-            taskObj.completedDate = null;
-    
-            date.textContent = "";
-        }
-    
-        span.classList.toggle("completed", checkbox.checked);
-    
-        //localStorage.setItem("tasks", JSON.stringify(tasks));
-    
-        // 移動処理
-        if (checkbox.checked) {
+                new Date(taskObj.completedDate).toLocaleString("ja-JP");
+
             completedList.appendChild(li);
+
         } else {
+
+            taskObj.completedDate = null;
+
+            date.textContent = "";
+
             taskList.appendChild(li);
+
         }
-    
+
+        span.classList.toggle("completed", checkbox.checked);
+
     });
-    //editBtn
+
+    // 編集
     const editBtn = document.createElement("button");
+
     editBtn.innerHTML = '<i class="material-icons">edit</i>';
 
     editBtn.addEventListener("click", async function () {
 
         const newTask = prompt("タスクを編集してください", taskObj.text);
-    
+
         if (newTask !== null && newTask !== "") {
-    
+
             taskObj.text = newTask;
-    
+
             span.textContent = newTask;
 
             await updateDoc(doc(db, "tasks", taskObj.id), {
                 text: newTask
             });
-    
-            //localStorage.setItem("tasks", JSON.stringify(tasks));
+
         }
+
     });
 
-    //deletBtn
+    // 削除
     const deleteBtn = document.createElement("button");
+
     deleteBtn.innerHTML = '<i class="material-icons">delete</i>';
 
     deleteBtn.addEventListener("click", async function () {
 
-        await deleteDoc(doc(db, "tasks", taskObj.id));
-        li.remove();
+        try {
 
-        tasks = tasks.filter(t => t !== taskObj);
-        //localStorage.setItem("tasks", JSON.stringify(tasks));
+            await deleteDoc(doc(db, "tasks", taskObj.id));
+
+            li.remove();
+
+            tasks = tasks.filter(t => t.id !== taskObj.id);
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
     });
 
     li.appendChild(checkbox);
@@ -118,8 +131,9 @@ function createTask(taskObj){
     li.appendChild(editBtn);
     li.appendChild(deleteBtn);
     li.appendChild(taskDateText);
+
     li.classList.add("task-item");
-    
+
     if (taskObj.completed) {
         completedList.appendChild(li);
     } else {
@@ -128,7 +142,14 @@ function createTask(taskObj){
 
 }
 
-addBtn.addEventListener("click", function () {
+// タスク追加
+addBtn.addEventListener("click", async function () {
+
+    if (!auth.currentUser) {
+        alert("ログインしてください");
+        return;
+    }
+
     const task = taskInput.value;
 
     if (task === "") {
@@ -143,28 +164,106 @@ addBtn.addEventListener("click", function () {
         completedDate: null
     };
 
-    createTask(taskObj);
+    try {
 
-    tasks.push(taskObj);
-    //localStorage.setItem("tasks", JSON.stringify(tasks));
+        const docRef = await addDoc(collection(db, "tasks"), {
+            text: taskObj.text,
+            completed: taskObj.completed,
+            date: taskObj.date,
+            uid: auth.currentUser.uid
+        });
 
-    addDoc(collection(db, "tasks"), {
-        text: taskObj.text,
-        completed: taskObj.completed,
-        date: taskObj.date,
-        uid: auth.currentUser.uid
-    });
+        taskObj.id = docRef.id;
 
-    taskInput.value = "";
+        tasks.push(taskObj);
+
+        createTask(taskObj);
+
+        taskInput.value = "";
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
 });
-onAuthStateChanged(auth, async function(user) {
+
+// Enterキー
+taskInput.addEventListener("keydown", function (e) {
+
+    if (e.key === "Enter") {
+
+        e.preventDefault();
+
+        addBtn.click();
+
+    }
+
+});
+
+// DarkMode
+darkModeBtn.addEventListener("click", function () {
+
+    document.body.classList.toggle("dark-mode");
+
+    if (document.body.classList.contains("dark-mode")) {
+
+        localStorage.setItem("darkMode", "on");
+
+        darkModeBtn.classList.remove("fa-moon");
+        darkModeBtn.classList.add("fa-sun");
+
+    } else {
+
+        localStorage.setItem("darkMode", "off");
+
+        darkModeBtn.classList.remove("fa-sun");
+        darkModeBtn.classList.add("fa-moon");
+
+    }
+
+});
+
+// Login
+loginBtn.addEventListener("click", async function () {
+
+    try {
+
+        const result = await signInWithPopup(auth, provider);
+
+        console.log(result.user);
+
+        alert("ログイン成功");
+
+    } catch (error) {
+
+        console.log(error);
+
+    }
+
+});
+
+// Logout
+logoutBtn.addEventListener("click", async function () {
+
+    await signOut(auth);
+
+    alert("ログアウトしました");
+
+});
+
+// ログイン状態監視
+onAuthStateChanged(auth, async function (user) {
+
+    taskList.innerHTML = "";
+    completedList.innerHTML = "";
+
+    tasks = [];
 
     if (user) {
 
         userName.textContent = user.displayName;
-
-        taskList.innerHTML = "";
-        completedList.innerHTML = "";
 
         const q = query(
             collection(db, "tasks"),
@@ -191,62 +290,5 @@ onAuthStateChanged(auth, async function(user) {
         userName.textContent = "";
 
     }
-
-});
-
-    //const savedMode = localStorage.getItem("darkMode");
-
-    //if (savedMode === "on") {
-
-      //  document.body.classList.add("dark-mode");
-
-       // darkModeBtn.classList.remove("fa-moon");
-       // darkModeBtn.classList.add("fa-sun");
-
-   // }
-
-taskInput.addEventListener("keydown", function(e){
-    if (e.key === "Enter") {
-        e.preventDefault(); // ← これ追加
-        addBtn.click();
-    }
-});
-darkModeBtn.addEventListener("click", function () {
-
-    document.body.classList.toggle("dark-mode");
-
-    if (document.body.classList.contains("dark-mode")) {
-
-        localStorage.setItem("darkMode", "on");
-
-        // アイコン変更
-        darkModeBtn.classList.remove("fa-moon");
-        darkModeBtn.classList.add("fa-sun");
-
-    } else {
-
-        localStorage.setItem("darkMode", "off");
-
-        // アイコン戻す
-        darkModeBtn.classList.remove("fa-sun");
-        darkModeBtn.classList.add("fa-moon");
-
-    }
-
-});
-loginBtn.addEventListener("click", async function () {
-
-    const result = await signInWithPopup(auth, provider);
-
-    console.log(result.user);
-
-    alert("ログイン成功");
-
-});
-logoutBtn.addEventListener("click", async function () {
-
-    await signOut(auth);
-
-    alert("ログアウトしました");
 
 });
