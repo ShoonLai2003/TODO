@@ -157,27 +157,40 @@ addBtn.addEventListener("click", function () {
 
     taskInput.value = "";
 });
-window.addEventListener("load", async function () {
+onAuthStateChanged(auth, async function(user) {
 
-    const q = query(
-        collection(db, "tasks"),
-        where("uid", "==", auth.currentUser.uid)
-    );
-    
-    const querySnapshot = await getDocs(q);
+    if (user) {
 
-    querySnapshot.forEach((doc) => {
+        userName.textContent = user.displayName;
 
-        const taskObj = {
-            id: doc.id,
-            ...doc.data()
-        };
+        taskList.innerHTML = "";
+        completedList.innerHTML = "";
 
-        tasks.push(taskObj);
+        const q = query(
+            collection(db, "tasks"),
+            where("uid", "==", user.uid)
+        );
 
-        createTask(taskObj);
+        const querySnapshot = await getDocs(q);
 
-    });
+        querySnapshot.forEach((docItem) => {
+
+            const taskObj = {
+                id: docItem.id,
+                ...docItem.data()
+            };
+
+            tasks.push(taskObj);
+
+            createTask(taskObj);
+
+        });
+
+    } else {
+
+        userName.textContent = "";
+
+    }
 
 });
 
@@ -235,19 +248,5 @@ logoutBtn.addEventListener("click", async function () {
     await signOut(auth);
 
     alert("ログアウトしました");
-
-});
-
-onAuthStateChanged(auth, function(user) {
-
-    if (user) {
-
-        userName.textContent = user.displayName;
-
-    } else {
-
-        userName.textContent = "";
-
-    }
 
 });
